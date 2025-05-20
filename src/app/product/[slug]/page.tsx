@@ -20,6 +20,9 @@ interface Product {
   images: {
     id: number;
     url: string;
+    formats?: {
+      thumbnail?: { url: string };
+    };
   }[];
   catagory?: {
     id: number;
@@ -31,6 +34,7 @@ interface Product {
 export default function ProductDetailPage() {
   const { slug } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -42,7 +46,11 @@ export default function ProductDetailPage() {
         const res = await fetch(`${BASE_URL}/api/products?populate=*`);
         const data = await res.json();
         const matched = data.data.find((p: any) => p.slug === slug);
-        if (matched) setProduct(matched);
+        if (matched) {
+          setProduct(matched);
+          const firstImageUrl = matched.images?.[0]?.url || '';
+          setSelectedImage(firstImageUrl);
+        }
       } catch (err) {
         console.error('Error loading product:', err);
       } finally {
@@ -53,10 +61,8 @@ export default function ProductDetailPage() {
     fetchProduct();
   }, [slug]);
 
-  const getImageUrl = (images: Product['images']) => {
-    if (!images || images.length === 0) return '/placeholder.png';
-    const url = images[0].url;
-    return url.startsWith('http') ? url : BASE_URL + url;
+  const getFullImageUrl = (url: string) => {
+    return url?.startsWith('http') ? url : BASE_URL + url;
   };
 
   if (loading) return <p className="text-center py-20 text-gray-500">Loading...</p>;
@@ -65,17 +71,37 @@ export default function ProductDetailPage() {
   return (
     <div className="bg-white text-gray-800 px-4 sm:px-6 md:px-10 py-10 min-h-screen">
       <div className="flex flex-col lg:flex-row gap-8 max-w-6xl mx-auto">
-        {/* Product Image */}
+        {/* Product Image & Thumbnails */}
         <div className="flex-1">
-          <div className="relative w-full h-[350px] sm:h-[400px] bg-gray-100 rounded-xl overflow-hidden">
+          <div className="relative w-full h-[350px] sm:h-[400px] bg-gray-100 rounded-xl overflow-hidden mb-4">
             <Image
-              src={getImageUrl(product.images)}
+              src={getFullImageUrl(selectedImage || '')}
               alt={product.title}
               fill
-              className="object-cover"
+              className="object-contain"
               priority
               unoptimized={false}
             />
+          </div>
+
+          <div className="flex gap-2">
+            {product.images.map((img) => (
+              <button
+                key={img.id}
+                onClick={() => setSelectedImage(img.url)}
+                className={`w-16 h-16 rounded overflow-hidden border-2 ${
+                  selectedImage === img.url ? 'border-blue-600' : 'border-gray-300'
+                }`}
+              >
+                <Image
+                  src={getFullImageUrl(img.formats?.thumbnail?.url || img.url)}
+                  alt="Thumbnail"
+                  width={64}
+                  height={64}
+                  className="object-cover"
+                />
+              </button>
+            ))}
           </div>
         </div>
 

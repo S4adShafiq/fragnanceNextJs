@@ -69,11 +69,6 @@ export default function HomePage() {
     }
   };
 
-  const getBestImageUrl = (images: Product['images']) => {
-    if (!images || images.length === 0) return '/placeholder.png';
-    return images[0].url; // already full URL from Strapi
-  };
-
   const getShortDescription = (description: Product['Description']) => {
     const text = description?.[0]?.children?.[0]?.text || '';
     return text.split(' ').slice(0, 18).join(' ') + (text.split(' ').length > 18 ? '...' : '');
@@ -136,16 +131,26 @@ export default function HomePage() {
               key={product.id}
               className="group flex flex-col sm:flex-row bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-md transition duration-300 overflow-hidden"
             >
-              {/* Image */}
-              <div className="sm:w-56 w-full h-64 sm:h-auto bg-gray-100 relative">
+              {/* Image Swap */}
+              <div className="sm:w-56 w-full h-64 sm:h-auto bg-gray-100 relative overflow-hidden">
                 <Image
-                  src={getBestImageUrl(product.images)}
+                  src={product.images?.[0]?.url || '/placeholder.png'}
                   alt={product.title}
                   fill
                   sizes="(max-width: 768px) 100vw, 300px"
-                  className="object-cover group-hover:scale-105 transition-transform duration-300 rounded-l-2xl sm:rounded-none"
+                  className="object-cover transition-opacity duration-300 group-hover:opacity-0"
                   loading="lazy"
                 />
+                {product.images?.[1] && (
+                  <Image
+                    src={product.images[1].url}
+                    alt={`${product.title} hover`}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 300px"
+                    className="object-cover transition-opacity duration-300 opacity-0 group-hover:opacity-100"
+                    loading="lazy"
+                  />
+                )}
               </div>
 
               {/* Content */}
