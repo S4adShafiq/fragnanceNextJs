@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 
@@ -38,6 +38,10 @@ export default function ProductDetailPage() {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const zoomRef = useRef<HTMLDivElement | null>(null);
+  const zoomImgRef = useRef<HTMLImageElement | null>(null);
+  const imageContainerRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
     if (!slug) return;
 
@@ -65,6 +69,33 @@ export default function ProductDetailPage() {
     return url?.startsWith('http') ? url : BASE_URL + url;
   };
 
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!zoomRef.current || !zoomImgRef.current || !imageContainerRef.current) return;
+
+    const rect = imageContainerRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const xPercent = (x / rect.width) * 100;
+    const yPercent = (y / rect.height) * 100;
+
+    zoomRef.current.style.display = 'block';
+    zoomRef.current.style.left = `${e.pageX + 20}px`;
+    zoomRef.current.style.top = `${e.pageY - 150}px`;
+
+    zoomImgRef.current.style.transformOrigin = `${xPercent}% ${yPercent}%`;
+    zoomImgRef.current.style.transform = `scale(3)`;
+  };
+
+  const handleMouseEnter = () => {
+    if (zoomRef.current) zoomRef.current.style.display = 'block';
+  };
+
+  const handleMouseLeave = () => {
+    if (zoomRef.current) zoomRef.current.style.display = 'none';
+    if (zoomImgRef.current) zoomImgRef.current.style.transform = 'scale(1)';
+  };
+
   if (loading) return <p className="text-center py-20 text-gray-500">Loading...</p>;
   if (!product) return <p className="text-center py-20 text-red-500">Product not found.</p>;
 
@@ -73,15 +104,33 @@ export default function ProductDetailPage() {
       <div className="flex flex-col lg:flex-row gap-8 max-w-6xl mx-auto">
         {/* Product Image & Thumbnails */}
         <div className="flex-1">
-          <div className="relative w-full h-[350px] sm:h-[400px] bg-gray-100 rounded-xl overflow-hidden mb-4">
+          <div
+            ref={imageContainerRef}
+            className="relative w-full h-[350px] sm:h-[400px] bg-gray-100 rounded-xl overflow-hidden mb-4 cursor-zoom-in"
+            onMouseMove={handleMouseMove}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
             <Image
               src={getFullImageUrl(selectedImage || '')}
               alt={product.title}
               fill
-              className="object-contain"
+              className="object-contain pointer-events-none"
               priority
               unoptimized={false}
             />
+            <div
+              ref={zoomRef}
+              className="hidden fixed z-50 w-64 h-64 overflow-hidden border-2 border-gray-300 rounded-lg shadow-lg bg-white"
+              style={{ display: 'none' }}
+            >
+              <img
+                ref={zoomImgRef}
+                src={getFullImageUrl(selectedImage || '')}
+                alt="Zoomed"
+                className="w-full h-full object-contain transition-transform duration-75 ease-in-out"
+              />
+            </div>
           </div>
 
           <div className="flex gap-2">
