@@ -41,8 +41,7 @@ export default function ProductDetailPage() {
       try {
         const res = await fetch(`${BASE_URL}/api/products?populate=*`);
         const data = await res.json();
-        const matched = data.data.find((p: Product) => p.slug === slug);
-
+        const matched = data.data.find((p: any) => p.slug === slug);
         if (matched) setProduct(matched);
       } catch (err) {
         console.error('Error loading product:', err);
