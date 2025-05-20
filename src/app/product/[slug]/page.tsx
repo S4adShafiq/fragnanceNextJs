@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import Image from 'next/image';
 
-const BASE_URL = 'http://localhost:1337';
+const BASE_URL = 'https://passionate-cherry-2410795bbd.strapiapp.com';
 
 interface Size {
   id: number;
@@ -54,7 +55,8 @@ export default function ProductDetailPage() {
 
   const getImageUrl = (images: Product['images']) => {
     if (!images || images.length === 0) return '/placeholder.png';
-    return BASE_URL + images[0].url;
+    const url = images[0].url;
+    return url.startsWith('http') ? url : BASE_URL + url;
   };
 
   if (loading) return <p className="text-center py-20 text-gray-500">Loading...</p>;
@@ -65,11 +67,14 @@ export default function ProductDetailPage() {
       <div className="flex flex-col lg:flex-row gap-8 max-w-6xl mx-auto">
         {/* Product Image */}
         <div className="flex-1">
-          <div className="w-full h-[350px] sm:h-[400px] bg-gray-100 rounded-xl overflow-hidden">
-            <img
+          <div className="relative w-full h-[350px] sm:h-[400px] bg-gray-100 rounded-xl overflow-hidden">
+            <Image
               src={getImageUrl(product.images)}
               alt={product.title}
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
+              priority
+              unoptimized={false}
             />
           </div>
         </div>
@@ -79,9 +84,7 @@ export default function ProductDetailPage() {
           <div>
             <h1 className="text-2xl md:text-3xl font-bold mb-1">{product.title}</h1>
             <p className="text-lg text-gray-600 mb-1">Rs. {product.price}</p>
-            <p className="text-sm text-gray-400">
-              Category: {product.catagory?.Name}
-            </p>
+            <p className="text-sm text-gray-400">Category: {product.catagory?.Name}</p>
           </div>
 
           {/* Size Selector */}

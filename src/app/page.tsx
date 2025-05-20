@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
-const BASE_URL = 'http://localhost:1337';
+const BASE_URL = 'https://passionate-cherry-2410795bbd.strapiapp.com';
 
 interface Size {
   id: number;
@@ -71,7 +71,7 @@ export default function HomePage() {
 
   const getBestImageUrl = (images: Product['images']) => {
     if (!images || images.length === 0) return '/placeholder.png';
-    return BASE_URL + images[0].url;
+    return images[0].url; // already full URL from Strapi
   };
 
   const getShortDescription = (description: Product['Description']) => {
@@ -142,9 +142,9 @@ export default function HomePage() {
                   src={getBestImageUrl(product.images)}
                   alt={product.title}
                   fill
+                  sizes="(max-width: 768px) 100vw, 300px"
                   className="object-cover group-hover:scale-105 transition-transform duration-300 rounded-l-2xl sm:rounded-none"
                   loading="lazy"
-                  unoptimized
                 />
               </div>
 
