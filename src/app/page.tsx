@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
-const BASE_URL = 'https://passionate-cherry-2410795bbd.strapiapp.co';
+const BASE_URL = 'https://passionate-cherry-2410795bbd.strapiapp.com';
 
 interface Size {
   id: number;
