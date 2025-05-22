@@ -31,6 +31,74 @@ interface Product {
   size: Size[];
 }
 
+const ProductCard = ({ product }: { product: Product }) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  return (
+    <div
+      key={product.id}
+      className="bg-white transition-all duration-300 hover:shadow-xl hover:shadow-gray-400/60 flex flex-col p-4"
+    >
+      <Link
+        href={`/product/${product.slug}`}
+        className="w-full group flex-1 flex flex-col"
+      >
+        <div className="relative w-full h-64 mb-4 overflow-hidden rounded">
+          {!imageLoaded && (
+            <div className="absolute inset-0 bg-gray-200 animate-pulse rounded" />
+          )}
+          {product.images?.[0]?.url && (
+            <>
+              {/* Default image */}
+              <Image
+                src={product.images[0].url}
+                alt={product.title}
+                fill
+                loading="lazy"
+                sizes="(max-width: 768px) 100vw, 33vw"
+                className={`object-contain absolute inset-0 transition-opacity duration-300 group-hover:opacity-0 ${
+                  imageLoaded ? "opacity-100" : "opacity-0"
+                }`}
+                onLoadingComplete={() => setImageLoaded(true)}
+              />
+
+              {/* Hover image (if available) */}
+              {product.images[1]?.url && (
+                <Image
+                  src={product.images[1].url}
+                  alt={`${product.title} - Hover`}
+                  fill
+                  loading="lazy"
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  className={`object-contain absolute inset-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100`}
+                />
+              )}
+            </>
+          )}
+        </div>
+
+        <div className="text-xs tracking-wide text-gray-700 uppercase mb-2 text-left">
+          {product.title}
+        </div>
+        <div className="text-black font-bold text-sm mb-3 text-left">
+          PKR {product.price}
+        </div>
+
+        <div className="mt-auto pt-3">
+          <button
+            className={`w-full text-xs border px-4 py-2 transition-colors duration-200
+              md:border-black md:text-black md:bg-white md:hover:bg-black md:hover:text-white
+              border-black text-white bg-black hover:bg-white hover:text-black
+            `}
+          >
+            ADD TO BAG
+          </button>
+        </div>
+      </Link>
+    </div>
+  );
+};
+
 export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -40,7 +108,9 @@ export default function HomePage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const catRes = await fetch(`${BASE_URL}/api/catagories?populate=products`);
+        const catRes = await fetch(
+          `${BASE_URL}/api/catagories?populate=products`
+        );
         const catData = await catRes.json();
         setCategories(catData.data);
 
@@ -121,34 +191,34 @@ export default function HomePage() {
         <aside className="p-6 hidden md:block">
           <h3 className="font-semibold text-base mb-4">SHOPPING OPTIONS</h3>
           <div className="mb-6">
-        <h4 className="font-bold mb-2 text-xs">CATEGORY</h4>
-        <div className="space-y-2 text-xs">
-          <button
-            onClick={() => toggleCategory("all")}
-            className="flex items-center gap-2"
-          >
-            <input
-          type="radio"
-          checked={selectedCategoryIds.length === 0}
-          readOnly
-            />{" "}
-            All
-          </button>
-          {categories.map((cat) => (
-            <button
-          key={cat.id}
-          onClick={() => toggleCategory(cat.id)}
-          className="flex items-center gap-2"
-            >
-          <input
-            type="radio"
-            checked={selectedCategoryIds.includes(cat.id)}
-            readOnly
-          />{" "}
-          {cat.Name}
-            </button>
-          ))}
-        </div>
+            <h4 className="font-bold mb-2 text-xs">CATEGORY</h4>
+            <div className="space-y-2 text-xs">
+              <button
+                onClick={() => toggleCategory("all")}
+                className="flex items-center gap-2"
+              >
+                <input
+                  type="radio"
+                  checked={selectedCategoryIds.length === 0}
+                  readOnly
+                />{" "}
+                All
+              </button>
+              {categories.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => toggleCategory(cat.id)}
+                  className="flex items-center gap-2"
+                >
+                  <input
+                    type="radio"
+                    checked={selectedCategoryIds.includes(cat.id)}
+                    readOnly
+                  />{" "}
+                  {cat.Name}
+                </button>
+              ))}
+            </div>
           </div>
         </aside>
 
@@ -156,54 +226,7 @@ export default function HomePage() {
         <main className="p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProducts.map((product) => (
-                <div
-                key={product.id}
-                className="bg-white transition-all duration-300 hover:shadow-xl hover:shadow-gray-400/60 flex flex-col p-4"
-                >
-                <Link href={`/product/${product.slug}`} className="w-full group flex-1 flex flex-col">
-                  <div className="relative w-full h-64 mb-4">
-                  {/* Default image */}
-                  <Image
-                    src={product.images?.[0]?.url || "/placeholder.png"}
-                    alt={product.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                    className="object-contain transition-opacity duration-300 group-hover:opacity-0"
-                    quality={90}
-                  />
-                  {/* Hover image */}
-                  {product.images?.[1]?.url && (
-                    <Image
-                    src={product.images[1].url}
-                    alt={`${product.title} alternate`}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                    className="object-contain absolute top-0 left-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                    quality={90}
-                    />
-                  )}
-                  </div>
-                  <div className="text-xs tracking-wide text-gray-700 uppercase mb-2 text-left">
-                  {product.title}
-                  </div>
-                  <div className="text-black font-bold text-sm mb-3 text-left">
-                  PKR {product.price}
-                  </div>
-                  <div className="mt-auto pt-3">
-                    <button
-                    className={`w-full text-xs border px-4 py-2 transition-colors duration-200
-                      ${
-                      // On mobile: black bg, white text. On desktop: white bg, black text.
-                      "md:border-black md:text-black md:bg-white md:hover:bg-black md:hover:text-white " +
-                      "border-black text-white bg-black hover:bg-white hover:text-black"
-                      }
-                    `}
-                    >
-                    ADD TO BAG
-                    </button>
-                  </div>
-                </Link>
-                </div>
+              <ProductCard key={product.id} product={product} />
             ))}
           </div>
         </main>

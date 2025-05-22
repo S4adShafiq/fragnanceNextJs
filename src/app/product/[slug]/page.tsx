@@ -35,6 +35,7 @@ export default function ProductDetailPage() {
   const { slug } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -63,16 +64,19 @@ export default function ProductDetailPage() {
     return url?.startsWith("http") ? url : BASE_URL + url;
   };
 
-  if (loading)
+  if (loading) {
     return (
       <p className="text-center py-10 text-gray-500 text-sm">Loading...</p>
     );
-  if (!product)
+  }
+
+  if (!product) {
     return (
       <p className="text-center py-10 text-red-500 text-sm">
         Product not found.
       </p>
     );
+  }
 
   return (
     <div className="bg-white px-2 sm:px-4 py-6 sm:py-10 max-w-auto mx-auto text-gray-900 text-sm md:text-base min-h-screen">
@@ -80,20 +84,34 @@ export default function ProductDetailPage() {
         {/* Left: Images */}
         <div className="w-full flex flex-col items-center">
           <div className="w-full max-w-[220px] sm:max-w-[260px] aspect-[4/5] relative">
-            <Image
-              src={getFullImageUrl(selectedImage || "")}
-              alt={product.title}
-              fill
-              className="object-contain rounded-lg border"
-              unoptimized={false}
-              priority
-            />
+            {!imageLoaded && (
+              <div className="absolute inset-0 bg-gray-200 animate-pulse rounded-lg" />
+            )}
+            {selectedImage && (
+              <Image
+                src={getFullImageUrl(selectedImage)}
+                alt={product.title}
+                fill
+                className={`object-contain rounded-lg border transition-opacity duration-300 ${
+                  imageLoaded ? "opacity-100" : "opacity-0"
+                }`}
+                onLoadingComplete={() => setImageLoaded(true)}
+                loading="eager" // first image is priority
+                unoptimized={false}
+                priority
+              />
+            )}
           </div>
+
+          {/* Thumbnail Images */}
           <div className="flex gap-2 mt-2 overflow-x-auto w-full max-w-[220px] sm:max-w-[260px]">
             {product.images.map((img) => (
               <button
                 key={img.id}
-                onClick={() => setSelectedImage(img.url)}
+                onClick={() => {
+                  setSelectedImage(img.url);
+                  setImageLoaded(false); // reset shimmer on change
+                }}
                 className={`min-w-[44px] h-11 border-2 rounded overflow-hidden ${
                   selectedImage === img.url ? "border-black" : "border-gray-300"
                 }`}
@@ -104,6 +122,7 @@ export default function ProductDetailPage() {
                   width={44}
                   height={44}
                   className="object-cover"
+                  loading="lazy"
                 />
               </button>
             ))}
@@ -146,20 +165,21 @@ export default function ProductDetailPage() {
             (!) Fragrances and perfumes are not shipped internationally due to
             the courier and airline DG policy.
           </p>
-            <div className="border-t pt-3 mt-3">
+
+          <div className="border-t pt-3 mt-3">
             <h3 className="font-semibold mb-1">Details</h3>
             <div className="text-gray-600 text-xs space-y-1">
               {product.Description.map((block, index) =>
                 block.children.map((child, i) =>
                   typeof child.text === "string"
-                    ? child.text.split('\n').map((line, j) => (
+                    ? child.text.split("\n").map((line, j) => (
                         <p key={`${index}-${i}-${j}`}>{line}</p>
                       ))
                     : null
                 )
               )}
             </div>
-            </div>
+          </div>
 
           <div className="border-t pt-3 mt-3">
             <h3 className="font-semibold mb-1">More Information</h3>
