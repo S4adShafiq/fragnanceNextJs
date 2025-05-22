@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 
-const BASE_URL = 'https://passionate-cherry-2410795bbd.strapiapp.com';
+ const BASE_URL = 'https://passionate-cherry-2410795bbd.strapiapp.com';
 
 interface Size {
   id: number;

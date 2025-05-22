@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
 
-const BASE_URL = 'https://passionate-cherry-2410795bbd.strapiapp.com';
+const BASE_URL = "https://passionate-cherry-2410795bbd.strapiapp.com";
 
 interface Size {
   id: number;
@@ -50,7 +50,7 @@ export default function HomePage() {
         const prodData = await prodRes.json();
         setProducts(prodData.data);
       } catch (error) {
-        console.error('Failed to fetch data:', error);
+        console.error("Failed to fetch data:", error);
       } finally {
         setLoading(false);
       }
@@ -59,59 +59,55 @@ export default function HomePage() {
     fetchData();
   }, []);
 
-  const toggleCategory = (id: number | 'all') => {
-    if (id === 'all') {
+  const toggleCategory = (id: number | "all") => {
+    if (id === "all") {
       setSelectedCategoryIds([]);
     } else {
-      setSelectedCategoryIds(prev =>
-        prev.includes(id) ? prev.filter(cid => cid !== id) : [...prev, id]
+      setSelectedCategoryIds((prev) =>
+        prev.includes(id) ? prev.filter((cid) => cid !== id) : [...prev, id]
       );
     }
   };
 
-  const getShortDescription = (description: Product['Description']) => {
-    const text = description?.[0]?.children?.[0]?.text || '';
-    return text.split(' ').slice(0, 18).join(' ') + (text.split(' ').length > 18 ? '...' : '');
-  };
-
   const filteredProducts = useMemo(() => {
     if (selectedCategoryIds.length === 0) return products;
-    return products.filter(product =>
+    return products.filter((product) =>
       selectedCategoryIds.includes(product.catagory?.id)
     );
   }, [products, selectedCategoryIds]);
 
   if (loading) {
     return (
-      <div className="text-center text-gray-500 text-xl py-20">Loading products...</div>
+      <div className="text-center text-gray-500 text-xl py-20">
+        Loading products...
+      </div>
     );
   }
 
   return (
-    <div className="bg-white text-gray-800 px-4 sm:px-6 md:px-10 py-10 min-h-screen">
-      {/* Header + Category Pills Filter */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">Shop by Category</h2>
-        <div className="flex flex-wrap gap-3">
+    <div className="bg-white text-gray-800 min-h-screen text-sm">
+      {/* Mobile category filter */}
+      <div className="p-4 md:hidden border-b border-gray-200">
+        <h4 className="font-semibold text-sm mb-2">CATEGORY</h4>
+        <div className="flex flex-wrap gap-3 text-xs">
           <button
-            onClick={() => toggleCategory('all')}
-            className={`px-4 py-1.5 rounded-full border text-sm transition ${
+            onClick={() => toggleCategory("all")}
+            className={`px-3 py-1 border rounded-full ${
               selectedCategoryIds.length === 0
-                ? 'bg-blue-600 text-white border-blue-600'
-                : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'
+                ? "bg-black text-white"
+                : "border-gray-400"
             }`}
           >
             All
           </button>
-
-          {categories.map(cat => (
+          {categories.map((cat) => (
             <button
               key={cat.id}
               onClick={() => toggleCategory(cat.id)}
-              className={`px-4 py-1.5 rounded-full border text-sm transition ${
+              className={`px-3 py-1 border rounded-full ${
                 selectedCategoryIds.includes(cat.id)
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'
+                  ? "bg-black text-white"
+                  : "border-gray-400"
               }`}
             >
               {cat.Name}
@@ -120,69 +116,98 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Product List */}
-      {filteredProducts.length === 0 ? (
-        <p className="text-gray-500">No products found in this category.</p>
-      ) : (
-        <div className="flex flex-col gap-6">
-          {filteredProducts.map(product => (
-            <Link
-              href={`/product/${product.slug}`}
-              key={product.id}
-              className="group flex flex-col sm:flex-row bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-md transition duration-300 overflow-hidden"
+      <div className="grid grid-cols-1 md:grid-cols-[250px_1fr]">
+        {/* Sidebar for desktop */}
+        <aside className="p-6 hidden md:block">
+          <h3 className="font-semibold text-base mb-4">SHOPPING OPTIONS</h3>
+          <div className="mb-6">
+        <h4 className="font-bold mb-2 text-xs">CATEGORY</h4>
+        <div className="space-y-2 text-xs">
+          <button
+            onClick={() => toggleCategory("all")}
+            className="flex items-center gap-2"
+          >
+            <input
+          type="radio"
+          checked={selectedCategoryIds.length === 0}
+          readOnly
+            />{" "}
+            All
+          </button>
+          {categories.map((cat) => (
+            <button
+          key={cat.id}
+          onClick={() => toggleCategory(cat.id)}
+          className="flex items-center gap-2"
             >
-              {/* Image Swap */}
-              <div className="sm:w-56 w-full h-64 sm:h-auto bg-gray-100 relative overflow-hidden">
-                <Image
-                  src={product.images?.[0]?.url || '/placeholder.png'}
-                  alt={product.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 300px"
-                  className="object-cover transition-opacity duration-300 group-hover:opacity-0"
-                  loading="lazy"
-                />
-                {product.images?.[1] && (
-                  <Image
-                    src={product.images[1].url}
-                    alt={`${product.title} hover`}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 300px"
-                    className="object-cover transition-opacity duration-300 opacity-0 group-hover:opacity-100"
-                    loading="lazy"
-                  />
-                )}
-              </div>
-
-              {/* Content */}
-              <div className="flex flex-col justify-between p-4 sm:p-6 w-full gap-2">
-                <div className="flex justify-between items-start">
-                  <h3 className="text-xl font-bold text-gray-800">{product.title}</h3>
-                  <span className="text-base font-semibold text-blue-600 whitespace-nowrap">
-                    Rs. {product.price}
-                  </span>
-                </div>
-
-                {product.Description?.length > 0 && (
-                  <p className="text-sm text-gray-600 mt-1 line-clamp-3 leading-relaxed">
-                    {getShortDescription(product.Description)}
-                  </p>
-                )}
-
-                <div className="mt-4 flex flex-wrap items-center gap-2">
-                  <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
-                    {product.catagory?.Name}
-                  </span>
-                  {product.size.length > 0 && (
-                    <span className="text-xs text-gray-400 italic">
-                      Sizes: {product.size.map(s => s.size).join(', ')}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </Link>
+          <input
+            type="radio"
+            checked={selectedCategoryIds.includes(cat.id)}
+            readOnly
+          />{" "}
+          {cat.Name}
+            </button>
           ))}
         </div>
-      )}
+          </div>
+        </aside>
+
+        {/* Product Grid */}
+        <main className="p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredProducts.map((product) => (
+                <div
+                key={product.id}
+                className="bg-white transition-all duration-300 hover:shadow-xl hover:shadow-gray-400/60 flex flex-col p-4"
+                >
+                <Link href={`/product/${product.slug}`} className="w-full group flex-1 flex flex-col">
+                  <div className="relative w-full h-64 mb-4">
+                  {/* Default image */}
+                  <Image
+                    src={product.images?.[0]?.url || "/placeholder.png"}
+                    alt={product.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className="object-contain transition-opacity duration-300 group-hover:opacity-0"
+                    quality={90}
+                  />
+                  {/* Hover image */}
+                  {product.images?.[1]?.url && (
+                    <Image
+                    src={product.images[1].url}
+                    alt={`${product.title} alternate`}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className="object-contain absolute top-0 left-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    quality={90}
+                    />
+                  )}
+                  </div>
+                  <div className="text-xs tracking-wide text-gray-700 uppercase mb-2 text-left">
+                  {product.title}
+                  </div>
+                  <div className="text-black font-bold text-sm mb-3 text-left">
+                  PKR {product.price}
+                  </div>
+                  <div className="mt-auto pt-3">
+                    <button
+                    className={`w-full text-xs border px-4 py-2 transition-colors duration-200
+                      ${
+                      // On mobile: black bg, white text. On desktop: white bg, black text.
+                      "md:border-black md:text-black md:bg-white md:hover:bg-black md:hover:text-white " +
+                      "border-black text-white bg-black hover:bg-white hover:text-black"
+                      }
+                    `}
+                    >
+                    ADD TO BAG
+                    </button>
+                  </div>
+                </Link>
+                </div>
+            ))}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
