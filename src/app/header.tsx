@@ -1,6 +1,7 @@
 "use client";
 
 import Image from 'next/image';
+import Link from 'next/link'; // Import Link
 import { useState } from 'react';
 import { Menu, Search, ShoppingCart } from 'lucide-react';
 
@@ -57,9 +58,14 @@ const Header = () => {
                 <a href="#" className="uppercase text-black">Women</a>
                 <a href="#" className="uppercase text-black">Men</a>
                 <a href="#" className="uppercase text-black">Boys & Girls</a>
-                <a href="#" className="uppercase text-black">Fragrances</a>
+
+                {/* ✅ Updated Link for Fragrances */}
+                <Link href="/allProduct" className="uppercase text-black">Fragrances</Link>
+
                 <a href="#" className="uppercase text-black">Makeup</a>
-                <a href="#" className="uppercase relative text-black">Skincare <span className="text-red-600 text-[10px] absolute top-0 -right-4">New</span></a>
+                <a href="#" className="uppercase relative text-black">
+                    Skincare <span className="text-red-600 text-[10px] absolute top-0 -right-4">New</span>
+                </a>
                 <a href="#" className="text-red-600 font-medium uppercase">Sale</a>
             </nav>
 
@@ -74,9 +80,14 @@ const Header = () => {
                         <a href="#" className="text-black">Women</a>
                         <a href="#" className="text-black">Men</a>
                         <a href="#" className="text-black">Boys & Girls</a>
-                        <a href="#" className="text-black">Fragrances</a>
+
+                        {/* ✅ Updated Mobile Link for Fragrances */}
+                        <Link href="/allProduct" className="text-black">Fragrances</Link>
+
                         <a href="#" className="text-black">Makeup</a>
-                        <a href="#" className="text-black">Skincare <span className="text-xs text-red-600">NEW</span></a>
+                        <a href="#" className="text-black">
+                            Skincare <span className="text-xs text-red-600">NEW</span>
+                        </a>
                         <a href="#" className="text-red-600">Sale</a>
                         <div className="flex gap-4 mt-2">
                             <ShoppingCart className="w-4 h-4" />
