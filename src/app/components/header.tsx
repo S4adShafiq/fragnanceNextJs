@@ -11,7 +11,7 @@ const Header = () => {
     return (
         <header className="w-full border-b text-sm">
             {/* Topbar */}
-            <div className="flex flex-wrap justify-between items-center px-2 md:px-4 py-2 bg-gray-100 text-xs md:text-sm relative">
+            <div className="flex flex-wrap justify-between items-center px-2 md:px-4 py-2 bg-white text-xs md:text-sm relative">
                 {/* Mobile: Centered Logo & Menu Button */}
                 <div className="flex items-center w-full justify-between lg:hidden relative">
                     {/* Centered Logo */}
