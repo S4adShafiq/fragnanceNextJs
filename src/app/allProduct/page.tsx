@@ -63,7 +63,7 @@ const ProductCard = ({ product }: { product: Product }) => {
                 onLoadingComplete={() => setImageLoaded(true)}
               />
 
-              {/* Hover image (if available) */}
+              {/* Hover image */}
               {product.images[1]?.url && (
                 <Image
                   src={product.images[1].url}
@@ -71,7 +71,7 @@ const ProductCard = ({ product }: { product: Product }) => {
                   fill
                   loading="lazy"
                   sizes="(max-width: 768px) 100vw, 33vw"
-                  className={`object-contain absolute inset-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100`}
+                  className="object-contain absolute inset-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100"
                 />
               )}
             </>
@@ -105,6 +105,7 @@ export default function HomePage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([]);
+  const [categoryOpen, setCategoryOpen] = useState(true); // 🔄 Collapsible toggle
 
   useEffect(() => {
     async function fetchData() {
@@ -148,9 +149,7 @@ export default function HomePage() {
   }, [products, selectedCategoryIds]);
 
   if (loading) {
-    return (
-      <SplashScreen />
-    );
+    return <SplashScreen />;
   }
 
   return (
@@ -187,36 +186,60 @@ export default function HomePage() {
 
       <div className="grid grid-cols-1 md:grid-cols-[250px_1fr]">
         {/* Sidebar for desktop */}
+        {/* Sidebar for desktop */}
         <aside className="p-6 hidden md:block">
           <h3 className="font-semibold text-base mb-4">SHOPPING OPTIONS</h3>
           <div className="mb-6">
-            <h4 className="font-bold mb-2 text-xs">CATEGORY</h4>
-            <div className="space-y-2 text-xs">
-              <button
-                onClick={() => toggleCategory("all")}
-                className="flex items-center gap-2"
+            <button
+              className="font-bold mb-2 text-xs flex items-center justify-between w-full"
+              onClick={() => setCategoryOpen(!categoryOpen)}
+            >
+              CATEGORY
+              <span
+          className={`text-xl transform transition-transform duration-300 ${
+            categoryOpen ? "rotate-0" : "rotate-90"
+          }`}
               >
-                <input
-                  type="radio"
-                  checked={selectedCategoryIds.length === 0}
-                  readOnly
-                />{" "}
-                All
-              </button>
-              {categories.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => toggleCategory(cat.id)}
-                  className="flex items-center gap-2"
-                >
-                  <input
-                    type="radio"
-                    checked={selectedCategoryIds.includes(cat.id)}
-                    readOnly
-                  />{" "}
-                  {cat.Name}
-                </button>
-              ))}
+          {categoryOpen ? "−" : "+"}
+              </span>
+            </button>
+
+            {/* Smooth collapsible animation with fade and slide */}
+            <div
+              className={`transition-all duration-500 overflow-hidden ${
+          categoryOpen ? "max-h-96 opacity-100 translate-y-0" : "max-h-0 opacity-0 -translate-y-2"
+              }`}
+              style={{
+          transitionProperty: "max-height, opacity, transform",
+              }}
+            >
+              <div className="space-y-2 text-xs mt-2">
+          <button
+            onClick={() => toggleCategory("all")}
+            className="flex items-center gap-2"
+          >
+            <input
+              type="radio"
+              checked={selectedCategoryIds.length === 0}
+              readOnly
+            />{" "}
+            All
+          </button>
+          {categories.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => toggleCategory(cat.id)}
+              className="flex items-center gap-2"
+            >
+              <input
+                type="radio"
+                checked={selectedCategoryIds.includes(cat.id)}
+                readOnly
+              />{" "}
+              {cat.Name}
+            </button>
+          ))}
+              </div>
             </div>
           </div>
         </aside>
