@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import SplashScreen from "../components/splashscreen";
 
 const BASE_URL = "https://passionate-cherry-2410795bbd.strapiapp.com";
 
@@ -148,9 +149,7 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className="text-center text-gray-500 text-xl py-20">
-        Loading products...
-      </div>
+      <SplashScreen />
     );
   }
 

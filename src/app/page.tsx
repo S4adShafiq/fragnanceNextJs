@@ -18,22 +18,33 @@ export default function Home() {
 
   return (
     <div className="relative w-full h-screen overflow-hidden">
-      {/* Slides */}
-      {slides[currentSlide].type === 'image' ? (
-        <img
-          src={slides[currentSlide].src}
-          alt="Slide"
-          className="w-full h-full object-cover"
-        />
-      ) : (
-        <video
-          src={slides[currentSlide].src}
-          autoPlay
-          loop
-          muted
-          className="w-full h-full object-cover"
-        />
-      )}
+      {/* Slides with fade animation */}
+      <div className="w-full h-full relative">
+        {slides.map((slide, idx) => (
+          <div
+            key={idx}
+            className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+              idx === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+            }`}
+          >
+            {slide.type === 'image' ? (
+              <img
+                src={slide.src}
+                alt="Slide"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <video
+                src={slide.src}
+                autoPlay
+                loop
+                muted
+                className="w-full h-full object-cover"
+              />
+            )}
+          </div>
+        ))}
+      </div>
 
       {/* Navigation Arrows */}
       <button
@@ -50,10 +61,10 @@ export default function Home() {
       </button>
 
       {/* Shop Now Button */}
-      <div className="absolute bottom-10 w-full flex justify-center px-4">
+      <div className="absolute bottom-10 w-full flex justify-center px-4 z-20">
         <button
           onClick={() => router.push('/allProduct')}
-          className="bg-white/40 text-black font-medium text-base md:text-lg px-4 py-2 rounded transition hover:bg-black/70 hover:text-white hover:font-semibold"
+          className="bg-transparent text-white border border-white font-medium text-base md:text-lg px-4 py-2 rounded transition hover:bg-white hover:text-black hover:font-semibold"
         >
           Shop Now
         </button>

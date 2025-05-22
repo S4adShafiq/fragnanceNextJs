@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
+import SplashScreen from "@/app/components/splashscreen";
 
 const BASE_URL = "https://passionate-cherry-2410795bbd.strapiapp.com";
 
@@ -65,9 +66,7 @@ export default function ProductDetailPage() {
   };
 
   if (loading) {
-    return (
-      <p className="text-center py-10 text-gray-500 text-sm">Loading...</p>
-    );
+    return <SplashScreen />;
   }
 
   if (!product) {

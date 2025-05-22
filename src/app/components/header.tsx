@@ -16,7 +16,9 @@ const Header = () => {
                 <div className="flex items-center w-full justify-between lg:hidden relative">
                     {/* Centered Logo */}
                     <div className="absolute left-0 right-0 flex justify-center pointer-events-none">
-                        <Image src="/jlogo.webp" alt="Logo" width={30} height={30} />
+                        <Link href="/" className="pointer-events-auto">
+                            <Image src="/jlogo.webp" alt="Logo" width={30} height={30} />
+                        </Link>
                     </div>
                     {/* Hamburger Button */}
                     <button
@@ -46,7 +48,9 @@ const Header = () => {
 
             {/* Centered Logo for Desktop */}
             <div className="hidden lg:flex justify-center py-3 md:py-4 bg-white">
-                <Image src="/jlogo.webp" alt="Logo" width={30} height={30} />
+                <Link href="/">
+                    <Image src="/jlogo.webp" alt="Logo" width={30} height={30} />
+                </Link>
             </div>
 
             {/* Navbar Below Logo */}
@@ -63,9 +67,6 @@ const Header = () => {
                 <Link href="/allProduct" className="uppercase text-black">Fragrances</Link>
 
                 <a href="#" className="uppercase text-black">Makeup</a>
-                <a href="#" className="uppercase relative text-black">
-                    Skincare <span className="text-red-600 text-[10px] absolute top-0 -right-4">New</span>
-                </a>
                 <a href="#" className="text-red-600 font-medium uppercase">Sale</a>
             </nav>
 
@@ -85,9 +86,6 @@ const Header = () => {
                         <Link href="/allProduct" className="text-black">Fragrances</Link>
 
                         <a href="#" className="text-black">Makeup</a>
-                        <a href="#" className="text-black">
-                            Skincare <span className="text-xs text-red-600">NEW</span>
-                        </a>
                         <a href="#" className="text-red-600">Sale</a>
                         <div className="flex gap-4 mt-2">
                             <ShoppingCart className="w-4 h-4" />
