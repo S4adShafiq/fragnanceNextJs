@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useEffect, useRef, useState } from 'react';
-import { useParams } from 'next/navigation';
-import Image from 'next/image';
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import Image from "next/image";
 
- const BASE_URL = 'https://passionate-cherry-2410795bbd.strapiapp.com';
+const BASE_URL = "https://passionate-cherry-2410795bbd.strapiapp.com";
 
 interface Size {
   id: number;
@@ -35,12 +35,7 @@ export default function ProductDetailPage() {
   const { slug } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-
-  const zoomRef = useRef<HTMLDivElement | null>(null);
-  const zoomImgRef = useRef<HTMLImageElement | null>(null);
-  const imageContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!slug) return;
@@ -52,11 +47,10 @@ export default function ProductDetailPage() {
         const matched = data.data.find((p: any) => p.slug === slug);
         if (matched) {
           setProduct(matched);
-          const firstImageUrl = matched.images?.[0]?.url || '';
-          setSelectedImage(firstImageUrl);
+          setSelectedImage(matched.images?.[0]?.url || "");
         }
       } catch (err) {
-        console.error('Error loading product:', err);
+        console.error("Error loading product:", err);
       } finally {
         setLoading(false);
       }
@@ -66,87 +60,49 @@ export default function ProductDetailPage() {
   }, [slug]);
 
   const getFullImageUrl = (url: string) => {
-    return url?.startsWith('http') ? url : BASE_URL + url;
+    return url?.startsWith("http") ? url : BASE_URL + url;
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!zoomRef.current || !zoomImgRef.current || !imageContainerRef.current) return;
-
-    const rect = imageContainerRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    const xPercent = (x / rect.width) * 100;
-    const yPercent = (y / rect.height) * 100;
-
-    zoomRef.current.style.display = 'block';
-    zoomRef.current.style.left = `${e.pageX + 20}px`;
-    zoomRef.current.style.top = `${e.pageY - 150}px`;
-
-    zoomImgRef.current.style.transformOrigin = `${xPercent}% ${yPercent}%`;
-    zoomImgRef.current.style.transform = `scale(3)`;
-  };
-
-  const handleMouseEnter = () => {
-    if (zoomRef.current) zoomRef.current.style.display = 'block';
-  };
-
-  const handleMouseLeave = () => {
-    if (zoomRef.current) zoomRef.current.style.display = 'none';
-    if (zoomImgRef.current) zoomImgRef.current.style.transform = 'scale(1)';
-  };
-
-  if (loading) return <p className="text-center py-20 text-gray-500">Loading...</p>;
-  if (!product) return <p className="text-center py-20 text-red-500">Product not found.</p>;
+  if (loading)
+    return (
+      <p className="text-center py-10 text-gray-500 text-sm">Loading...</p>
+    );
+  if (!product)
+    return (
+      <p className="text-center py-10 text-red-500 text-sm">
+        Product not found.
+      </p>
+    );
 
   return (
-    <div className="bg-white text-gray-800 px-4 sm:px-6 md:px-10 py-10 min-h-screen">
-      <div className="flex flex-col lg:flex-row gap-8 max-w-6xl mx-auto">
-        {/* Product Image & Thumbnails */}
-        <div className="flex-1">
-          <div
-            ref={imageContainerRef}
-            className="relative w-full h-[350px] sm:h-[400px] bg-gray-100 rounded-xl overflow-hidden mb-4 cursor-zoom-in"
-            onMouseMove={handleMouseMove}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-          >
+    <div className="bg-white px-2 sm:px-4 py-6 sm:py-10 max-w-auto mx-auto text-gray-900 text-sm md:text-base min-h-screen">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
+        {/* Left: Images */}
+        <div className="w-full flex flex-col items-center">
+          <div className="w-full max-w-[220px] sm:max-w-[260px] aspect-[4/5] relative">
             <Image
-              src={getFullImageUrl(selectedImage || '')}
+              src={getFullImageUrl(selectedImage || "")}
               alt={product.title}
               fill
-              className="object-contain pointer-events-none"
-              priority
+              className="object-contain rounded-lg border"
               unoptimized={false}
+              priority
             />
-            <div
-              ref={zoomRef}
-              className="hidden fixed z-50 w-64 h-64 overflow-hidden border-2 border-gray-300 rounded-lg shadow-lg bg-white"
-              style={{ display: 'none' }}
-            >
-              <img
-                ref={zoomImgRef}
-                src={getFullImageUrl(selectedImage || '')}
-                alt="Zoomed"
-                className="w-full h-full object-contain transition-transform duration-75 ease-in-out"
-              />
-            </div>
           </div>
-
-          <div className="flex gap-2">
+          <div className="flex gap-2 mt-2 overflow-x-auto w-full max-w-[220px] sm:max-w-[260px]">
             {product.images.map((img) => (
               <button
                 key={img.id}
                 onClick={() => setSelectedImage(img.url)}
-                className={`w-16 h-16 rounded overflow-hidden border-2 ${
-                  selectedImage === img.url ? 'border-blue-600' : 'border-gray-300'
+                className={`min-w-[44px] h-11 border-2 rounded overflow-hidden ${
+                  selectedImage === img.url ? "border-black" : "border-gray-300"
                 }`}
               >
                 <Image
                   src={getFullImageUrl(img.formats?.thumbnail?.url || img.url)}
                   alt="Thumbnail"
-                  width={64}
-                  height={64}
+                  width={44}
+                  height={44}
                   className="object-cover"
                 />
               </button>
@@ -154,65 +110,63 @@ export default function ProductDetailPage() {
           </div>
         </div>
 
-        {/* Product Info */}
-        <div className="flex-1 space-y-6">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold mb-1">{product.title}</h1>
-            <p className="text-lg text-gray-600 mb-1">Rs. {product.price}</p>
-            <p className="text-sm text-gray-400">Category: {product.catagory?.Name}</p>
+        {/* Right: Product Info */}
+        <div className="space-y-3 md:space-y-5">
+          <h1 className="text-lg sm:text-xl md:text-2xl font-semibold tracking-wide uppercase">
+            {product.title}
+          </h1>
+          <p className="text-xs text-gray-500">SKU#: 01060632-100-001</p>
+          <p className="text-xs text-green-600">IN STOCK</p>
+
+          <div className="text-yellow-500 text-xs font-medium flex flex-wrap items-center gap-1">
+            ★★★★★{" "}
+            <span className="text-gray-500 underline cursor-pointer">
+              42 REVIEWS
+            </span>{" "}
+            <span className="text-gray-500">|</span>{" "}
+            <span className="text-gray-500 underline cursor-pointer">
+              WRITE YOUR REVIEW
+            </span>
           </div>
 
-          {/* Size Selector */}
-          {product.size?.length > 0 && (
-            <div>
-              <p className="text-sm font-medium mb-2">Select Size:</p>
-              <div className="flex flex-wrap gap-2">
-                {product.size.map((s) => (
-                  <button
-                    key={s.id}
-                    onClick={() => setSelectedSize(s.size)}
-                    className={`px-4 py-1 rounded-full border text-sm transition ${
-                      selectedSize === s.size
-                        ? 'bg-blue-600 text-white border-blue-600'
-                        : 'bg-white text-gray-800 border-gray-300 hover:border-gray-500'
-                    }`}
-                  >
-                    {s.size}
-                  </button>
-                ))}
-              </div>
-              {selectedSize && (
-                <p className="mt-2 text-sm text-green-600">Selected: {selectedSize}</p>
-              )}
-            </div>
-          )}
+          <p className="text-lg sm:text-xl font-bold">PKR {product.price}</p>
+          <p className="text-green-600 text-xs font-medium">
+            Pay in 3 installments of PKR {(+product.price / 3).toFixed(2)}
+          </p>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 mt-6">
-            <button
-              onClick={() => {}}
-              className="flex-1 sm:flex-none sm:w-40 px-6 py-3 bg-blue-600 text-white text-sm font-semibold rounded-md shadow hover:bg-blue-700 active:scale-95 transition duration-200"
-            >
-              🛒 Add to Cart
-            </button>
-            <button
-              onClick={() => {}}
-              className="flex-1 sm:flex-none sm:w-40 px-6 py-3 border border-blue-600 text-blue-600 text-sm font-semibold rounded-md hover:bg-blue-50 active:scale-95 transition duration-200"
-            >
-              ⚡ Buy Now
-            </button>
-          </div>
+          <p className="text-red-600 text-xs font-semibold mt-1">
+            ● Only 10 Left in Stock — Act Fast!
+          </p>
 
-          {/* Description */}
-          <div>
-            <h2 className="text-md font-semibold mb-2">Product Description</h2>
-            <div className="text-gray-600 text-sm leading-relaxed space-y-2">
+          <button className="w-1/2 border border-black py-2 text-xs font-semibold uppercase hover:bg-black hover:text-white transition">
+            Add to Bag
+          </button>
+
+          <p className="text-red-500 text-[10px] mt-2">
+            (!) Fragrances and perfumes are not shipped internationally due to
+            the courier and airline DG policy.
+          </p>
+            <div className="border-t pt-3 mt-3">
+            <h3 className="font-semibold mb-1">Details</h3>
+            <div className="text-gray-600 text-xs space-y-1">
               {product.Description.map((block, index) =>
-                block.children.map((child, i) => (
-                  <p key={`${index}-${i}`}>{child.text}</p>
-                ))
+                block.children.map((child, i) =>
+                  typeof child.text === "string"
+                    ? child.text.split('\n').map((line, j) => (
+                        <p key={`${index}-${i}-${j}`}>{line}</p>
+                      ))
+                    : null
+                )
               )}
             </div>
+            </div>
+
+          <div className="border-t pt-3 mt-3">
+            <h3 className="font-semibold mb-1">More Information</h3>
+            <p className="text-gray-500 text-xs">
+              Additional product information, shipping details, and customer
+              policies can be found here.
+            </p>
           </div>
         </div>
       </div>
