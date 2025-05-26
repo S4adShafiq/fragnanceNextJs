@@ -13,10 +13,11 @@ interface Size {
 }
 
 interface Product {
-  id: number;
+  documentId: string;
   slug: string;
   title: string;
   price: string;
+  isavailable?: boolean; // <-- Use this instead of inStock
   Description: { type: string; children: { text: string }[] }[];
   images: {
     id: number;
@@ -36,6 +37,7 @@ export default function ProductDetailPage() {
   const { slug } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedSize, setSelectedSize] = useState<Size | null>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -50,6 +52,9 @@ export default function ProductDetailPage() {
         if (matched) {
           setProduct(matched);
           setSelectedImage(matched.images?.[0]?.url || "");
+          if (matched.size?.length) {
+            setSelectedSize(matched.size[0]);
+          }
         }
       } catch (err) {
         console.error("Error loading product:", err);
@@ -65,9 +70,7 @@ export default function ProductDetailPage() {
     return url?.startsWith("http") ? url : BASE_URL + url;
   };
 
-  if (loading) {
-    return <SplashScreen />;
-  }
+  if (loading) return <SplashScreen />;
 
   if (!product) {
     return (
@@ -80,11 +83,11 @@ export default function ProductDetailPage() {
   return (
     <div className="bg-white px-2 sm:px-4 py-6 sm:py-10 max-w-auto mx-auto text-gray-900 text-sm md:text-base min-h-screen">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
-        {/* Left: Images */}
+        {/* Left: Image Display */}
         <div className="w-full flex flex-col items-center">
           <div className="w-full max-w-[220px] sm:max-w-[260px] aspect-[4/5] relative">
             {!imageLoaded && (
-              <div className="absolute inset-0 bg-gray-200 animate-pulse rounded-lg" />
+              <div className="absolute inset-0 shimmer rounded-lg" />
             )}
             {selectedImage && (
               <Image
@@ -95,21 +98,20 @@ export default function ProductDetailPage() {
                   imageLoaded ? "opacity-100" : "opacity-0"
                 }`}
                 onLoadingComplete={() => setImageLoaded(true)}
-                loading="eager" // first image is priority
-                unoptimized={false}
+                loading="eager"
                 priority
               />
             )}
           </div>
 
-          {/* Thumbnail Images */}
+          {/* Thumbnails */}
           <div className="flex gap-2 mt-2 overflow-x-auto w-full max-w-[220px] sm:max-w-[260px]">
             {product.images.map((img) => (
               <button
                 key={img.id}
                 onClick={() => {
                   setSelectedImage(img.url);
-                  setImageLoaded(false); // reset shimmer on change
+                  setImageLoaded(false);
                 }}
                 className={`min-w-[44px] h-11 border-2 rounded overflow-hidden ${
                   selectedImage === img.url ? "border-black" : "border-gray-300"
@@ -133,8 +135,16 @@ export default function ProductDetailPage() {
           <h1 className="text-lg sm:text-xl md:text-2xl font-semibold tracking-wide uppercase">
             {product.title}
           </h1>
-          <p className="text-xs text-gray-500">SKU#: 01060632-100-001</p>
-          <p className="text-xs text-green-600">IN STOCK</p>
+
+          {/* ✅ SKU and Stock */}
+          <p className="text-xs text-gray-500">SKU#: {product.documentId}</p>
+          <p
+            className={`text-xs font-semibold ${
+              product.isavailable ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {product.isavailable ? "IN STOCK" : "OUT OF STOCK"}
+          </p>
 
           <div className="text-yellow-500 text-xs font-medium flex flex-wrap items-center gap-1">
             ★★★★★{" "}
@@ -152,9 +162,31 @@ export default function ProductDetailPage() {
             Pay in 3 installments of PKR {(+product.price / 3).toFixed(2)}
           </p>
 
-          <p className="text-red-600 text-xs font-semibold mt-1">
-            ● Only 10 Left in Stock — Act Fast!
+          <p className="text text-xs font-semibold mt-1">
+            🟢 Limited Stock Alert: Get Yours Before They're Gone!
           </p>
+
+          {/* ✅ Size Toggle */}
+          {product.size?.length > 0 && (
+            <div className="mt-2">
+              <p className="text-xs font-medium mb-1">Select Size:</p>
+              <div className="flex gap-2 flex-wrap">
+                {product.size.map((sz) => (
+                  <button
+                    key={sz.id}
+                    onClick={() => setSelectedSize(sz)}
+                    className={`px-3 py-1 border rounded text-xs ${
+                      selectedSize?.id === sz.id
+                        ? "bg-black text-white border-black"
+                        : "border-gray-300"
+                    }`}
+                  >
+                    {sz.size}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <button className="w-1/2 border border-black py-2 text-xs font-semibold uppercase hover:bg-black hover:text-white transition">
             Add to Bag
@@ -165,21 +197,25 @@ export default function ProductDetailPage() {
             the courier and airline DG policy.
           </p>
 
+          {/* Details */}
           <div className="border-t pt-3 mt-3">
             <h3 className="font-semibold mb-1">Details</h3>
             <div className="text-gray-600 text-xs space-y-1">
               {product.Description.map((block, index) =>
                 block.children.map((child, i) =>
                   typeof child.text === "string"
-                    ? child.text.split("\n").map((line, j) => (
-                        <p key={`${index}-${i}-${j}`}>{line}</p>
-                      ))
+                    ? child.text
+                        .split("\n")
+                        .map((line, j) => (
+                          <p key={`${index}-${i}-${j}`}>{line}</p>
+                        ))
                     : null
                 )
               )}
             </div>
           </div>
 
+          {/* More Info */}
           <div className="border-t pt-3 mt-3">
             <h3 className="font-semibold mb-1">More Information</h3>
             <p className="text-gray-500 text-xs">

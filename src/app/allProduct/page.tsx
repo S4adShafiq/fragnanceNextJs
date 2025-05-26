@@ -46,8 +46,9 @@ const ProductCard = ({ product }: { product: Product }) => {
       >
         <div className="relative w-full h-64 mb-4 overflow-hidden rounded">
           {!imageLoaded && (
-            <div className="absolute inset-0 bg-gray-200 animate-pulse rounded" />
+            <div className="absolute inset-0 shimmer rounded" />
           )}
+
           {product.images?.[0]?.url && (
             <>
               <Image
@@ -94,6 +95,17 @@ const ProductCard = ({ product }: { product: Product }) => {
           </button>
         </div>
       </Link>
+    </div>
+  );
+};
+
+const ProductSkeletonCard = () => {
+  return (
+    <div className="bg-white p-4 flex flex-col shadow-sm">
+      <div className="w-full h-64 bg-gray-200 rounded shimmer mb-4" />
+      <div className="h-4 bg-gray-200 rounded mb-2 w-3/4 shimmer" />
+      <div className="h-4 bg-gray-200 rounded mb-3 w-1/2 shimmer" />
+      <div className="h-9 bg-gray-300 shimmer rounded mt-auto" />
     </div>
   );
 };
@@ -145,10 +157,6 @@ export default function HomePage() {
       selectedCategoryIds.includes(product.catagory?.id)
     );
   }, [products, selectedCategoryIds]);
-
-  if (loading) {
-    return <SplashScreen />;
-  }
 
   return (
     <div className="bg-white text-gray-800 min-h-screen text-sm">
@@ -242,9 +250,13 @@ export default function HomePage() {
 
         <main className="p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+            {loading
+              ? Array.from({ length: 6 }).map((_, idx) => (
+                  <ProductSkeletonCard key={idx} />
+                ))
+              : filteredProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
           </div>
         </main>
       </div>
