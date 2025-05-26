@@ -17,7 +17,7 @@ interface Product {
   slug: string;
   title: string;
   price: string;
-  isavailable?: boolean; // <-- Use this instead of inStock
+  isavailable?: boolean;
   Description: { type: string; children: { text: string }[] }[];
   images: {
     id: number;
@@ -46,9 +46,12 @@ export default function ProductDetailPage() {
 
     async function fetchProduct() {
       try {
-        const res = await fetch(`${BASE_URL}/api/products?populate=*`);
+        // Fetch only the product with the matching slug
+        const res = await fetch(
+          `${BASE_URL}/api/products?filters[slug][$eq]=${slug}&populate[images][fields][0]=url&populate[images][fields][1]=formats&populate[catagory][fields][0]=Name&populate[size]=true`
+        );
         const data = await res.json();
-        const matched = data.data.find((p: any) => p.slug === slug);
+        const matched = data.data[0]; // Strapi returns an array, take the first (and only) match
         if (matched) {
           setProduct(matched);
           setSelectedImage(matched.images?.[0]?.url || "");
@@ -136,7 +139,7 @@ export default function ProductDetailPage() {
             {product.title}
           </h1>
 
-          {/* ✅ SKU and Stock */}
+          {/* SKU and Stock */}
           <p className="text-xs text-gray-500">SKU#: {product.documentId}</p>
           <p
             className={`text-xs font-semibold ${
@@ -166,7 +169,7 @@ export default function ProductDetailPage() {
             🟢 Limited Stock Alert: Get Yours Before They're Gone!
           </p>
 
-          {/* ✅ Size Toggle */}
+          {/* Size Toggle */}
           {product.size?.length > 0 && (
             <div className="mt-2">
               <p className="text-xs font-medium mb-1">Select Size:</p>
