@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import SplashScreen from "@/app/components/splashscreen";
@@ -40,6 +41,9 @@ export default function ProductDetailPage() {
   const [selectedSize, setSelectedSize] = useState<Size | null>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isHovering, setIsHovering] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const imageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!slug) return;
@@ -48,7 +52,7 @@ export default function ProductDetailPage() {
       try {
         const res = await fetch(
           `${BASE_URL}/api/products?filters[slug][$eq]=${slug}&populate[images][fields][0]=url&populate[images][fields][1]=formats&populate[catagory][fields][0]=Name&populate[size]=true`,
-          { cache: "no-store" } // Next.js 15: Disable cache for dynamic data
+          { cache: "no-store" }
         );
         const data = await res.json();
         const matched = data.data[0];
@@ -73,18 +77,50 @@ export default function ProductDetailPage() {
     return url?.startsWith("http") ? url : BASE_URL + url;
   };
 
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!imageRef.current) return;
+
+    const rect = imageRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    // Ensure mouse position is within image bounds
+    if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
+      setMousePosition({ x, y });
+      setIsHovering(true);
+    } else {
+      setIsHovering(false);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovering(false);
+  };
+
   if (loading) return <SplashScreen />;
 
   if (!product) {
     return <p className="text-center py-10 text-red-500 text-sm">Product not found.</p>;
   }
 
+  // Calculate magnifier position and background position
+  const magnifierSize = 120; // Size of the magnifier popup
+  const zoomLevel = 2.5; // Magnification level
+  const imageRect = imageRef.current?.getBoundingClientRect();
+  const backgroundX = -(mousePosition.x * zoomLevel - magnifierSize / 2);
+  const backgroundY = -(mousePosition.y * zoomLevel - magnifierSize / 2);
+
   return (
     <div className="bg-white px-2 sm:px-4 py-6 sm:py-10 mx-auto text-gray-900 text-sm md:text-base min-h-screen">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
         {/* Left: Image Display */}
         <div className="w-full flex flex-col items-center">
-          <div className="w-full max-w-[220px] sm:max-w-[260px] aspect-[4/5] relative">
+          <div
+            ref={imageRef}
+            className="w-full max-w-[220px] sm:max-w-[260px] aspect-[4/5] relative cursor-zoom-in"
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+          >
             {!imageLoaded && <div className="absolute inset-0 animate-pulse bg-gray-200 rounded-lg" />}
             {selectedImage && (
               <Image
@@ -94,6 +130,18 @@ export default function ProductDetailPage() {
                 className={`object-contain rounded-lg border transition-opacity duration-300 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
                 onLoadingComplete={() => setImageLoaded(true)}
                 priority
+              />
+            )}
+            {isHovering && selectedImage && (
+              <div
+                className="absolute w-[300px] h-[300px] bg-white border border-gray-300 rounded-lg shadow-lg pointer-events-none"
+                style={{
+                  top: `${mousePosition.y - magnifierSize / 2}px`,
+                  left: `${mousePosition.x + 20}px`, // Offset to avoid overlapping cursor
+                  backgroundImage: `url(${getFullImageUrl(selectedImage)})`,
+                  backgroundSize: `${(imageRef.current?.offsetWidth || 260) * zoomLevel}px ${(imageRef.current?.offsetHeight || 325) * zoomLevel}px`,
+                  backgroundPosition: `${backgroundX}px ${backgroundY}px`,
+                }}
               />
             )}
           </div>
@@ -147,7 +195,7 @@ export default function ProductDetailPage() {
           </p>
 
           <p className="text-xs font-semibold mt-1">
-            🟢 Limited Stock Alert: Get Yours Before They&apos;re Gone!
+            🟢 Limited Stock Alert: Get Yours Before They're Gone!
           </p>
 
           {product.size?.length > 0 && (
