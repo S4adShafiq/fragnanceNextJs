@@ -1,9 +1,7 @@
 "use client";
-
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import SplashScreen from "../components/splashscreen";
 
 const BASE_URL = "https://passionate-cherry-2410795bbd.strapiapp.com";
 
@@ -38,58 +36,44 @@ const ProductCard = ({ product }: { product: Product }) => {
   return (
     <div
       key={product.id}
-      className="bg-white transition-all duration-300 hover:shadow-xl hover:shadow-gray-400/60 flex flex-col p-4"
+      className="bg-white p-4 flex flex-col transition-shadow duration-300 hover:shadow-xl hover:shadow-gray-400/60 rounded-lg"
     >
-      <Link
-        href={`/product/${product.slug}`}
-        className="w-full group flex-1 flex flex-col"
-      >
-        <div className="relative w-full h-64 mb-4 overflow-hidden rounded">
-          {!imageLoaded && (
-            <div className="absolute inset-0 shimmer rounded" />
-          )}
-
+      <Link href={`/product/${product.slug}`} className="flex-1 flex flex-col group">
+        <div className="relative w-full h-64 mb-4 overflow-hidden rounded-lg">
+          {!imageLoaded && <div className="absolute inset-0 animate-pulse bg-gray-200 rounded-lg" />}
           {product.images?.[0]?.url && (
             <>
               <Image
                 src={product.images[0].url}
                 alt={product.title}
                 fill
-                loading="lazy"
                 sizes="(max-width: 768px) 100vw, 33vw"
-                className={`object-contain absolute inset-0 transition-opacity duration-300 group-hover:opacity-0 ${
-                  imageLoaded ? "opacity-100" : "opacity-0"
-                }`}
+                className={`object-contain transition-opacity duration-300 group-hover:opacity-0 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
                 onLoadingComplete={() => setImageLoaded(true)}
               />
-
               {product.images[1]?.url && (
                 <Image
                   src={product.images[1].url}
                   alt={`${product.title} - Hover`}
                   fill
-                  loading="lazy"
                   sizes="(max-width: 768px) 100vw, 33vw"
-                  className="object-contain absolute inset-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100"
+                  className="object-contain transition-opacity duration-300 opacity-0 group-hover:opacity-100"
                 />
               )}
             </>
           )}
         </div>
 
-        <div className="text-xs tracking-wide text-gray-700 uppercase mb-2 text-left truncate overflow-hidden whitespace-nowrap min-h-[1.25rem]">
+        <div className="text-xs tracking-wider text-gray-600 uppercase mb-2 truncate">
           {product.title || ""}
         </div>
-        <div className="text-black font-bold text-sm mb-3 text-left truncate overflow-hidden whitespace-nowrap min-h-[1.25rem]">
+        <div className="text-black font-semibold text-sm mb-3 truncate">
           PKR {product.price || ""}
         </div>
 
         <div className="mt-auto pt-3">
           <button
-            className={`w-full text-xs border px-4 py-2 transition-colors duration-200
-              md:border-black md:text-black md:bg-white md:hover:bg-black md:hover:text-white
-              border-black text-white bg-black hover:bg-white hover:text-black
-            `}
+            className="w-full text-xs border border-black px-4 py-2 transition-colors duration-200 bg-white hover:bg-black hover:text-white md:bg-white md:hover:bg-black md:hover:text-white"
           >
             ADD TO BAG
           </button>
@@ -101,11 +85,11 @@ const ProductCard = ({ product }: { product: Product }) => {
 
 const ProductSkeletonCard = () => {
   return (
-    <div className="bg-white p-4 flex flex-col shadow-sm">
-      <div className="w-full h-64 bg-gray-200 rounded shimmer mb-4" />
-      <div className="h-4 bg-gray-200 rounded mb-2 w-3/4 shimmer" />
-      <div className="h-4 bg-gray-200 rounded mb-3 w-1/2 shimmer" />
-      <div className="h-9 bg-gray-300 shimmer rounded mt-auto" />
+    <div className="bg-white p-4 flex flex-col rounded-lg shadow-sm">
+      <div className="w-full h-64 bg-gray-200 rounded-lg animate-pulse mb-4" />
+      <div className="h-4 bg-gray-200 rounded mb-2 w-3/4 animate-pulse" />
+      <div className="h-4 bg-gray-200 rounded mb-3 w-1/2 animate-pulse" />
+      <div className="h-9 bg-gray-300 rounded mt-auto animate-pulse" />
     </div>
   );
 };
@@ -120,16 +104,14 @@ export default function HomePage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const catRes = await fetch(
-          `${BASE_URL}/api/catagories?populate=products`
-        );
-        const catData = await catRes.json();
+        const [catRes, prodRes] = await Promise.all([
+          fetch(`${BASE_URL}/api/catagories?populate=products`),
+          fetch(
+            `${BASE_URL}/api/products?populate[images][fields][0]=url&populate[catagory][fields][0]=Name&populate[size]=true`
+          ),
+        ]);
+        const [catData, prodData] = await Promise.all([catRes.json(), prodRes.json()]);
         setCategories(catData.data);
-
-        const prodRes = await fetch(
-          `${BASE_URL}/api/products?populate[images][fields][0]=url&populate[catagory][fields][0]=Name&populate[size]=true`
-        );
-        const prodData = await prodRes.json();
         setProducts(prodData.data);
       } catch (error) {
         console.error("Failed to fetch data:", error);
@@ -153,9 +135,7 @@ export default function HomePage() {
 
   const filteredProducts = useMemo(() => {
     if (selectedCategoryIds.length === 0) return products;
-    return products.filter((product) =>
-      selectedCategoryIds.includes(product.catagory?.id)
-    );
+    return products.filter((product) => selectedCategoryIds.includes(product.catagory?.id));
   }, [products, selectedCategoryIds]);
 
   return (
@@ -165,11 +145,7 @@ export default function HomePage() {
         <div className="flex flex-wrap gap-3 text-xs">
           <button
             onClick={() => toggleCategory("all")}
-            className={`px-3 py-1 border rounded-full ${
-              selectedCategoryIds.length === 0
-                ? "bg-black text-white"
-                : "border-gray-400"
-            }`}
+            className={`px-3 py-1 border rounded-full transition-colors duration-200 ${selectedCategoryIds.length === 0 ? "bg-black text-white" : "border-gray-400"}`}
           >
             All
           </button>
@@ -177,11 +153,7 @@ export default function HomePage() {
             <button
               key={cat.id}
               onClick={() => toggleCategory(cat.id)}
-              className={`px-3 py-1 border rounded-full ${
-                selectedCategoryIds.includes(cat.id)
-                  ? "bg-black text-white"
-                  : "border-gray-400"
-              }`}
+              className={`px-3 py-1 border rounded-full transition-colors duration-200 ${selectedCategoryIds.includes(cat.id) ? "bg-black text-white" : "border-gray-400"}`}
             >
               {cat.Name}
             </button>
@@ -199,23 +171,14 @@ export default function HomePage() {
             >
               CATEGORY
               <span
-                className={`text-xl transform transition-transform duration-300 ${
-                  categoryOpen ? "rotate-0" : "rotate-90"
-                }`}
+                className={`text-xl transition-transform duration-300 ${categoryOpen ? "rotate-0" : "rotate-90"}`}
               >
                 {categoryOpen ? "−" : "+"}
               </span>
             </button>
 
             <div
-              className={`transition-all duration-500 overflow-hidden ${
-                categoryOpen
-                  ? "max-h-96 opacity-100 translate-y-0"
-                  : "max-h-0 opacity-0 -translate-y-2"
-              }`}
-              style={{
-                transitionProperty: "max-height, opacity, transform",
-              }}
+              className={`transition-all duration-500 overflow-hidden ${categoryOpen ? "max-h-96 opacity-100 translate-y-0" : "max-h-0 opacity-0 -translate-y-2"}`}
             >
               <div className="space-y-2 text-xs mt-2">
                 <button
@@ -226,7 +189,8 @@ export default function HomePage() {
                     type="radio"
                     checked={selectedCategoryIds.length === 0}
                     readOnly
-                  />{" "}
+                    className="accent-black"
+                  />
                   All
                 </button>
                 {categories.map((cat) => (
@@ -239,7 +203,8 @@ export default function HomePage() {
                       type="radio"
                       checked={selectedCategoryIds.includes(cat.id)}
                       readOnly
-                    />{" "}
+                      className="accent-black"
+                    />
                     {cat.Name}
                   </button>
                 ))}
@@ -251,12 +216,8 @@ export default function HomePage() {
         <main className="p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {loading
-              ? Array.from({ length: 6 }).map((_, idx) => (
-                  <ProductSkeletonCard key={idx} />
-                ))
-              : filteredProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
+              ? Array.from({ length: 6 }).map((_, idx) => <ProductSkeletonCard key={idx} />)
+              : filteredProducts.map((product) => <ProductCard key={product.id} product={product} />)}
           </div>
         </main>
       </div>

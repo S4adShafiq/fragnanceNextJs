@@ -1,9 +1,9 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import SplashScreen from "@/app/components/splashscreen";
+
 
 const BASE_URL = "https://passionate-cherry-2410795bbd.strapiapp.com";
 
@@ -46,12 +46,12 @@ export default function ProductDetailPage() {
 
     async function fetchProduct() {
       try {
-        // Fetch only the product with the matching slug
         const res = await fetch(
-          `${BASE_URL}/api/products?filters[slug][$eq]=${slug}&populate[images][fields][0]=url&populate[images][fields][1]=formats&populate[catagory][fields][0]=Name&populate[size]=true`
+          `${BASE_URL}/api/products?filters[slug][$eq]=${slug}&populate[images][fields][0]=url&populate[images][fields][1]=formats&populate[catagory][fields][0]=Name&populate[size]=true`,
+          { cache: "no-store" } // Next.js 15: Disable cache for dynamic data
         );
         const data = await res.json();
-        const matched = data.data[0]; // Strapi returns an array, take the first (and only) match
+        const matched = data.data[0];
         if (matched) {
           setProduct(matched);
           setSelectedImage(matched.images?.[0]?.url || "");
@@ -76,32 +76,23 @@ export default function ProductDetailPage() {
   if (loading) return <SplashScreen />;
 
   if (!product) {
-    return (
-      <p className="text-center py-10 text-red-500 text-sm">
-        Product not found.
-      </p>
-    );
+    return <p className="text-center py-10 text-red-500 text-sm">Product not found.</p>;
   }
 
   return (
-    <div className="bg-white px-2 sm:px-4 py-6 sm:py-10 max-w-auto mx-auto text-gray-900 text-sm md:text-base min-h-screen">
+    <div className="bg-white px-2 sm:px-4 py-6 sm:py-10 mx-auto text-gray-900 text-sm md:text-base min-h-screen">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
         {/* Left: Image Display */}
         <div className="w-full flex flex-col items-center">
           <div className="w-full max-w-[220px] sm:max-w-[260px] aspect-[4/5] relative">
-            {!imageLoaded && (
-              <div className="absolute inset-0 shimmer rounded-lg" />
-            )}
+            {!imageLoaded && <div className="absolute inset-0 animate-pulse bg-gray-200 rounded-lg" />}
             {selectedImage && (
               <Image
                 src={getFullImageUrl(selectedImage)}
                 alt={product.title}
                 fill
-                className={`object-contain rounded-lg border transition-opacity duration-300 ${
-                  imageLoaded ? "opacity-100" : "opacity-0"
-                }`}
+                className={`object-contain rounded-lg border transition-opacity duration-300 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
                 onLoadingComplete={() => setImageLoaded(true)}
-                loading="eager"
                 priority
               />
             )}
@@ -116,9 +107,7 @@ export default function ProductDetailPage() {
                   setSelectedImage(img.url);
                   setImageLoaded(false);
                 }}
-                className={`min-w-[44px] h-11 border-2 rounded overflow-hidden ${
-                  selectedImage === img.url ? "border-black" : "border-gray-300"
-                }`}
+                className={`min-w-[44px] h-11 border-2 rounded overflow-hidden transition-colors duration-200 ${selectedImage === img.url ? "border-black" : "border-gray-300"}`}
               >
                 <Image
                   src={getFullImageUrl(img.formats?.thumbnail?.url || img.url)}
@@ -126,7 +115,6 @@ export default function ProductDetailPage() {
                   width={44}
                   height={44}
                   className="object-cover"
-                  loading="lazy"
                 />
               </button>
             ))}
@@ -135,29 +123,22 @@ export default function ProductDetailPage() {
 
         {/* Right: Product Info */}
         <div className="space-y-3 md:space-y-5">
-          <h1 className="text-lg sm:text-xl md:text-2xl font-semibold tracking-wide uppercase">
+          <h1 className="text-lg sm:text-xl md:text-2xl font-semibold tracking-wider uppercase">
             {product.title}
           </h1>
 
-          {/* SKU and Stock */}
           <p className="text-xs text-gray-500">SKU#: {product.documentId}</p>
           <p
-            className={`text-xs font-semibold ${
-              product.isavailable ? "text-green-600" : "text-red-600"
-            }`}
+            className={`text-xs font-semibold ${product.isavailable ? "text-green-600" : "text-red-600"}`}
           >
             {product.isavailable ? "IN STOCK" : "OUT OF STOCK"}
           </p>
 
           <div className="text-yellow-500 text-xs font-medium flex flex-wrap items-center gap-1">
             ★★★★★{" "}
-            <span className="text-gray-500 underline cursor-pointer">
-              42 REVIEWS
-            </span>{" "}
+            <span className="text-gray-500 underline cursor-pointer">42 REVIEWS</span>{" "}
             <span className="text-gray-500">|</span>{" "}
-            <span className="text-gray-500 underline cursor-pointer">
-              WRITE YOUR REVIEW
-            </span>
+            <span className="text-gray-500 underline cursor-pointer">WRITE YOUR REVIEW</span>
           </div>
 
           <p className="text-lg sm:text-xl font-bold">PKR {product.price}</p>
@@ -165,11 +146,10 @@ export default function ProductDetailPage() {
             Pay in 3 installments of PKR {(+product.price / 3).toFixed(2)}
           </p>
 
-          <p className="text text-xs font-semibold mt-1">
-            🟢 Limited Stock Alert: Get Yours Before They're Gone!
+          <p className="text-xs font-semibold mt-1">
+            🟢 Limited Stock Alert: Get Yours Before They&apos;re Gone!
           </p>
 
-          {/* Size Toggle */}
           {product.size?.length > 0 && (
             <div className="mt-2">
               <p className="text-xs font-medium mb-1">Select Size:</p>
@@ -178,11 +158,7 @@ export default function ProductDetailPage() {
                   <button
                     key={sz.id}
                     onClick={() => setSelectedSize(sz)}
-                    className={`px-3 py-1 border rounded text-xs ${
-                      selectedSize?.id === sz.id
-                        ? "bg-black text-white border-black"
-                        : "border-gray-300"
-                    }`}
+                    className={`px-3 py-1 border rounded text-xs transition-colors duration-200 ${selectedSize?.id === sz.id ? "bg-black text-white border-black" : "border-gray-300"}`}
                   >
                     {sz.size}
                   </button>
@@ -191,39 +167,31 @@ export default function ProductDetailPage() {
             </div>
           )}
 
-          <button className="w-1/2 border border-black py-2 text-xs font-semibold uppercase hover:bg-black hover:text-white transition">
+          <button className="w-1/2 border border-black py-2 text-xs font-semibold uppercase transition-colors duration-200 hover:bg-black hover:text-white">
             Add to Bag
           </button>
 
           <p className="text-red-500 text-[10px] mt-2">
-            (!) Fragrances and perfumes are not shipped internationally due to
-            the courier and airline DG policy.
+            (!) Fragrances and perfumes are not shipped internationally due to the courier and airline DG policy.
           </p>
 
-          {/* Details */}
           <div className="border-t pt-3 mt-3">
             <h3 className="font-semibold mb-1">Details</h3>
             <div className="text-gray-600 text-xs space-y-1">
               {product.Description.map((block, index) =>
                 block.children.map((child, i) =>
                   typeof child.text === "string"
-                    ? child.text
-                        .split("\n")
-                        .map((line, j) => (
-                          <p key={`${index}-${i}-${j}`}>{line}</p>
-                        ))
+                    ? child.text.split("\n").map((line, j) => <p key={`${index}-${i}-${j}`}>{line}</p>)
                     : null
                 )
               )}
             </div>
           </div>
 
-          {/* More Info */}
           <div className="border-t pt-3 mt-3">
             <h3 className="font-semibold mb-1">More Information</h3>
             <p className="text-gray-500 text-xs">
-              Additional product information, shipping details, and customer
-              policies can be found here.
+              Additional product information, shipping details, and customer policies can be found here.
             </p>
           </div>
         </div>
