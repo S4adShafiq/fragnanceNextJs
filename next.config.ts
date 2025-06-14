@@ -6,12 +6,12 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'passionate-cherry-2410795bbd.media.strapiapp.com',
-        pathname: '/**', // Allow all image paths
+        pathname: '/**', 
       },
     ],
   },
   eslint: {
-    ignoreDuringBuilds: true, // ✅ Disables ESLint checks during production build
+    ignoreDuringBuilds: true, 
   },
 };
 

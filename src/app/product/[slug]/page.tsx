@@ -52,7 +52,6 @@ export default function ProductDetailPage() {
       try {
         const res = await fetch(
           `${BASE_URL}/api/products?filters[slug][$eq]=${slug}&populate[images][fields][0]=url&populate[images][fields][1]=formats&populate[catagory][fields][0]=Name&populate[size]=true`,
-          { cache: "no-store" }
         );
         const data = await res.json();
         const matched = data.data[0];
