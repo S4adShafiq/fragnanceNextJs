@@ -1,12 +1,17 @@
 "use client";
-
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, cache } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import SplashScreen from "@/app/components/splashscreen";
 
-
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
+
+// Cache API fetch for product details
+const cachedFetchProduct = cache(async (url: string) => {
+  const res = await fetch(url, { cache: "force-cache" }); // Cache at Next.js level
+  if (!res.ok) throw new Error(`Failed to fetch ${url}`);
+  return res.json();
+});
 
 interface Size {
   id: number;
@@ -50,10 +55,9 @@ export default function ProductDetailPage() {
 
     async function fetchProduct() {
       try {
-        const res = await fetch(
-          `${BASE_URL}/api/products?filters[slug][$eq]=${slug}&populate[images][fields][0]=url&populate[images][fields][1]=formats&populate[catagory][fields][0]=Name&populate[size]=true`,
+        const data = await cachedFetchProduct(
+          `${BASE_URL}/api/products?filters[slug][$eq]=${slug}&populate[images][fields][0]=url&populate[images][fields][1]=formats&populate[catagory][fields][0]=Name&populate[size]=true`
         );
-        const data = await res.json();
         const matched = data.data[0];
         if (matched) {
           setProduct(matched);
@@ -83,7 +87,6 @@ export default function ProductDetailPage() {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    // Ensure mouse position is within image bounds
     if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
       setMousePosition({ x, y });
       setIsHovering(true);
@@ -102,17 +105,14 @@ export default function ProductDetailPage() {
     return <p className="text-center py-10 text-red-500 text-sm">Product not found.</p>;
   }
 
-  // Calculate magnifier position and background position
-  const magnifierSize = 120; // Size of the magnifier popup
-  const zoomLevel = 2.5; // Magnification level
-  const imageRect = imageRef.current?.getBoundingClientRect();
+  const magnifierSize = 120;
+  const zoomLevel = 2.5;
   const backgroundX = -(mousePosition.x * zoomLevel - magnifierSize / 2);
   const backgroundY = -(mousePosition.y * zoomLevel - magnifierSize / 2);
 
   return (
     <div className="bg-white px-2 sm:px-4 py-6 sm:py-10 mx-auto text-gray-900 text-sm md:text-base min-h-screen">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
-        {/* Left: Image Display */}
         <div className="w-full flex flex-col items-center">
           <div
             ref={imageRef}
@@ -136,7 +136,7 @@ export default function ProductDetailPage() {
                 className="absolute w-[300px] h-[300px] bg-white border border-gray-300 rounded-lg shadow-lg pointer-events-none"
                 style={{
                   top: `${mousePosition.y - magnifierSize / 2}px`,
-                  left: `${mousePosition.x + 20}px`, // Offset to avoid overlapping cursor
+                  left: `${mousePosition.x + 20}px`,
                   backgroundImage: `url(${getFullImageUrl(selectedImage)})`,
                   backgroundSize: `${(imageRef.current?.offsetWidth || 260) * zoomLevel}px ${(imageRef.current?.offsetHeight || 325) * zoomLevel}px`,
                   backgroundPosition: `${backgroundX}px ${backgroundY}px`,
@@ -145,7 +145,6 @@ export default function ProductDetailPage() {
             )}
           </div>
 
-          {/* Thumbnails */}
           <div className="flex gap-2 mt-2 overflow-x-auto w-full max-w-[220px] sm:max-w-[260px]">
             {product.images.map((img) => (
               <button
@@ -168,7 +167,6 @@ export default function ProductDetailPage() {
           </div>
         </div>
 
-        {/* Right: Product Info */}
         <div className="space-y-3 md:space-y-5">
           <h1 className="text-lg sm:text-xl md:text-2xl font-semibold tracking-wider uppercase">
             {product.title}

@@ -1,10 +1,16 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, cache } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
 
+// Cache API fetch functions to avoid duplicate requests
+const cachedFetch = cache(async (url: string) => {
+  const res = await fetch(url, { cache: "force-cache" }); 
+  if (!res.ok) throw new Error(`Failed to fetch ${url}`);
+  return res.json();
+});
 
 interface Size {
   id: number;
@@ -106,13 +112,13 @@ export default function HomePage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [catRes, prodRes] = await Promise.all([
-          fetch(`${BASE_URL}/api/catagories?populate=products`),
-          fetch(
+        setLoading(true);
+        const [catData, prodData] = await Promise.all([
+          cachedFetch(`${BASE_URL}/api/catagories?populate=products`),
+          cachedFetch(
             `${BASE_URL}/api/products?populate[images][fields][0]=url&populate[catagory][fields][0]=Name&populate[size]=true`
           ),
         ]);
-        const [catData, prodData] = await Promise.all([catRes.json(), prodRes.json()]);
         setCategories(catData.data);
         setProducts(prodData.data);
       } catch (error) {
