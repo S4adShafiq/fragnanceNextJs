@@ -6,7 +6,7 @@ import Image from "next/image";
 import SplashScreen from "@/app/components/splashscreen";
 
 
-const BASE_URL = "https://passionate-cherry-2410795bbd.strapiapp.com";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
 
 interface Size {
   id: number;

@@ -3,7 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
-const BASE_URL = "https://passionate-cherry-2410795bbd.strapiapp.com";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
+
 
 interface Size {
   id: number;
@@ -100,6 +101,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([]);
   const [categoryOpen, setCategoryOpen] = useState(true);
+  const [sortOption, setSortOption] = useState<"none" | "price-low" | "price-high">("none");
 
   useEffect(() => {
     async function fetchData() {
@@ -134,9 +136,18 @@ export default function HomePage() {
   };
 
   const filteredProducts = useMemo(() => {
-    if (selectedCategoryIds.length === 0) return products;
-    return products.filter((product) => selectedCategoryIds.includes(product.catagory?.id));
-  }, [products, selectedCategoryIds]);
+    let filtered = products;
+    if (selectedCategoryIds.length > 0) {
+      filtered = products.filter((product) => selectedCategoryIds.includes(product.catagory?.id));
+    }
+
+    if (sortOption === "price-low") {
+      return [...filtered].sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+    } else if (sortOption === "price-high") {
+      return [...filtered].sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+    }
+    return filtered;
+  }, [products, selectedCategoryIds, sortOption]);
 
   return (
     <div className="bg-white text-gray-800 min-h-screen text-sm">
@@ -214,6 +225,18 @@ export default function HomePage() {
         </aside>
 
         <main className="p-6">
+          <div className="flex justify-end mb-4">
+            <select
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value as "none" | "price-low" | "price-high")}
+              disabled={loading}
+              className={`text-xs border border-gray-400 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-black ${loading ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+            >
+              <option value="none">Sort By</option>
+              <option value="price-low">Price: Low to High</option>
+              <option value="price-high">Price: High to Low</option>
+            </select>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {loading
               ? Array.from({ length: 6 }).map((_, idx) => <ProductSkeletonCard key={idx} />)
