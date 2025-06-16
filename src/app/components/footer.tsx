@@ -1,7 +1,7 @@
 export default function Footer() {
   return (
     <footer className="bg-white text-black">
-      {/* Newsletter section */}
+
       <div className="bg-black text-white py-10 text-center px-4">
         <h2 className="text-xl font-semibold mb-2">BE THE FIRST</h2>
         <p className="mb-4 text-sm sm:text-base">
@@ -19,7 +19,6 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Info section */}
       <div className="max-w-7xl mx-auto px-4 py-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6 text-sm">
         <div>
           <h3 className="font-semibold mb-2">NEED HELP?</h3>
@@ -30,7 +29,7 @@ export default function Footer() {
 
         <div>
           <h3 className="font-semibold mb-2">CATALOGUE</h3>
-          {/* Empty or add links */}
+
         </div>
 
         <div>
@@ -69,7 +68,7 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Payments and Security badges */}
+     
     </footer>
   );
 }

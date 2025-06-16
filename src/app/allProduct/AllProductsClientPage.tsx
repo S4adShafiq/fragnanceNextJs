@@ -119,7 +119,7 @@ export default function AllProductsClientPage({ initialProducts, initialCategori
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-[250px_1fr]">
-        {/* Desktop Filters */}
+        
         <aside className="p-6 hidden md:block">
           <h3 className="font-semibold text-base mb-4">SHOPPING OPTIONS</h3>
           <div className="mb-6">
@@ -157,7 +157,7 @@ export default function AllProductsClientPage({ initialProducts, initialCategori
           </div>
         </aside>
 
-        {/* Product Grid */}
+
         <main className="p-6">
           <div className="flex justify-end mb-4">
             <select

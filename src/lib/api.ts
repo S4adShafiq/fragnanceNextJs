@@ -1,4 +1,3 @@
-// Centralized API configuration and functions
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL
 
 export interface Size {
@@ -31,14 +30,14 @@ export interface Product {
   size: Size[]
 }
 
-// Fetch all products with ISR
+
 export async function getAllProducts(): Promise<Product[]> {
   try {
     const res = await fetch(
       `${BASE_URL}/api/products?populate[images][fields][0]=url&populate[images][fields][1]=formats&populate[catagory][fields][0]=Name&populate[size]=true`,
       {
         next: {
-          revalidate: 3600, // Revalidate every hour
+          revalidate: 3600,
           tags: ["products"],
         },
       },
@@ -56,14 +55,13 @@ export async function getAllProducts(): Promise<Product[]> {
   }
 }
 
-// Fetch single product by slug with ISR
 export async function getProductBySlug(slug: string): Promise<Product | null> {
   try {
     const res = await fetch(
       `${BASE_URL}/api/products?filters[slug][$eq]=${slug}&populate[images][fields][0]=url&populate[images][fields][1]=formats&populate[catagory][fields][0]=Name&populate[size]=true`,
       {
         next: {
-          revalidate: 3600, // Revalidate every hour
+          revalidate: 3600,
           tags: [`product-${slug}`],
         },
       },
@@ -81,12 +79,12 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
   }
 }
 
-// Fetch all categories with ISR
+
 export async function getAllCategories(): Promise<Category[]> {
   try {
     const res = await fetch(`${BASE_URL}/api/catagories?populate=products`, {
       next: {
-        revalidate: 7200, // Revalidate every 2 hours
+        revalidate: 7200, 
         tags: ["categories"],
       },
     })
@@ -103,13 +101,13 @@ export async function getAllCategories(): Promise<Category[]> {
   }
 }
 
-// Get full image URL
+
 export function getFullImageUrl(url: string): string {
   if (!url) return "/placeholder.svg?height=400&width=400"
   return url.startsWith("http") ? url : BASE_URL + url
 }
 
-// Get all product slugs for static generation
+
 export async function getAllProductSlugs(): Promise<string[]> {
   try {
     const res = await fetch(`${BASE_URL}/api/products?fields[0]=slug`, {

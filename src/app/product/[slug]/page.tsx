@@ -9,7 +9,7 @@ interface ProductPageProps {
   params: Promise<{ slug: string }>
 }
 
-// Generate static params for all products at build time
+
 export async function generateStaticParams() {
   try {
     const slugs = await getAllProductSlugs()
@@ -23,7 +23,7 @@ export async function generateStaticParams() {
   }
 }
 
-// Generate dynamic metadata for SEO
+
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params
   const product = await getProductBySlug(slug)
@@ -73,7 +73,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   }
 }
 
-// Server Component - renders on server
+
 export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params
   const product = await getProductBySlug(slug)
@@ -82,7 +82,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound()
   }
 
-  // Generate structured data for SEO
+
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -136,7 +136,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
   )
 }
 
-// Enable ISR - page will be regenerated in background
-export const revalidate = 3600 // Revalidate every hour
-export const dynamic = "force-static" // Force static generation
-export const dynamicParams = true // Allow new slugs to be generated on-demand
+export const revalidate = 3600
+export const dynamic = "force-static"
+export const dynamicParams = true

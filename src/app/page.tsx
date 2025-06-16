@@ -18,7 +18,7 @@ export default function Home() {
 
   return (
     <div className="relative w-full h-screen overflow-hidden">
-      {/* Slides with fade animation */}
+    
       <div className="w-full h-full relative">
         {slides.map((slide, idx) => (
           <div
@@ -46,7 +46,7 @@ export default function Home() {
         ))}
       </div>
 
-      {/* Navigation Arrows */}
+
       <button
         onClick={prevSlide}
         className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white text-4xl font-bold z-10 hover:text-gray-300"
@@ -60,7 +60,7 @@ export default function Home() {
         &#10095;
       </button>
 
-      {/* Shop Now Button */}
+
       <div className="absolute bottom-10 w-full flex justify-center px-4 z-20">
         <button
           onClick={() => router.push('/allProduct')}

@@ -42,7 +42,7 @@ const Header = () => {
                 <Image src="/jlogo.webp" alt="Logo" width={30} height={30} />
               </Link>
             </div>
-            {/* Hamburger Button */}
+
             <button
               aria-label="Open menu"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -51,7 +51,7 @@ const Header = () => {
               <Menu color="black" />
             </button>
           </div>
-          {/* Desktop: Topbar Links */}
+       
           <div className="hidden lg:flex flex-wrap items-center gap-2 md:gap-3">
             <a href="#" className="hover:underline uppercase text-black">
               Welcome to J.
@@ -81,14 +81,14 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Centered Logo for Desktop */}
+   
       <div className="hidden lg:flex justify-center py-3 md:py-4 bg-white">
         <Link href="/">
           <Image src="/jlogo.webp" alt="Logo" width={30} height={30} />
         </Link>
       </div>
 
-      {/* Navbar Below Logo */}
+ 
       <nav className="hidden lg:flex items-center justify-center gap-4 xl:gap-8 px-2 xl:px-4 py-2 xl:py-3 bg-white flex-wrap">
         <Link
           href="/allProduct"
@@ -158,7 +158,7 @@ const Header = () => {
         </Link>
       </nav>
 
-      {/* Mobile Menu */}
+  
       {isMenuOpen && (
         <div className="lg:hidden flex flex-col px-2 md:px-4 py-2 bg-white">
           <div className="flex flex-col gap-2 mt-2 border-t pt-2 animate-slide-down">
