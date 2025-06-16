@@ -23,4 +23,4 @@ export default async function AllProductsPage() {
 }
 
 
-export const revalidate = 1800 // Revalidate every 30 minutes
+export const revalidate = 3600 // Revalidate every 60 minutes
